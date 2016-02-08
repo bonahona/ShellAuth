@@ -200,6 +200,7 @@ class PdoDatabase implements IDatabaseDriver
 
         if(!$preparedStatement = $this->Database->prepare($sqlStatement)){
             echo "Failed to prepare PDO statement";
+            echo "<br/>" . $sqlStatement;
             var_dump($this->Database->errorInfo());
         }
 

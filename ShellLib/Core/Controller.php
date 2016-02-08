@@ -26,7 +26,7 @@ class Controller
     public $Get;                        // Stores all get variables sent in
     public $Data;                       // Stores both the Get and Post variables
     public $Files;                      // Stores any files sent with the request
-    public $Session = array();          // Stores all the session data
+    public $Session;                    // Stores all the session data
     public $Cookies = array();          // Stores all cookies sent
     public $Server = array();           // Stores all server variables
 
