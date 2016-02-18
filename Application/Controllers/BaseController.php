@@ -41,7 +41,7 @@ class BaseController extends Controller
             $errorList = array($errors);
         }
 
-        return $this->Json(array('Error' => 0, 'ErrorList' => $errorList));
+        return $this->Json(array('Error' => 1, 'ErrorList' => $errorList));
     }
 
     protected function InvalidJson()

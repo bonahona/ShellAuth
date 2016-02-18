@@ -12,6 +12,7 @@ class ShellApplication extends Model
         }
 
         unset($result['RsaPrivateKey']);
+        unset($result['IsDeleted']);
         return $result;
     }
 }

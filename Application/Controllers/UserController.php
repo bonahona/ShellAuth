@@ -9,7 +9,6 @@ class UserController extends BaseController
             return $this->InvalidApplication();
         }
 
-
         $shellUser = $this->Models->ShellUser->Create();
         $shellUser->Username = $this->PayLoad['ShellUser']['Username'];
         $shellUser->DisplayName = $this->PayLoad['ShellUser']['DisplayName'];
@@ -36,7 +35,7 @@ class UserController extends BaseController
         $password = $this->PayLoad['ShellUser']['Password'];
 
         // Check if the user exists
-        $shellUser = $this->Models->User->Where(array('Username' => $username, 'IsDeleted' => 0, 'IsInactive' => 0))->First();
+        $shellUser = $this->Models->ShellUser->Where(array('Username' => $username, 'IsDeleted' => 0, 'IsInactive' => 0))->First();
         if($shellUser == null){
             return $this->Error('User could not login');
         }
@@ -50,7 +49,7 @@ class UserController extends BaseController
         $privilege = $shellUser->ShellUserPrivileges->Where(array('ShellApplicationId' => $shellApplication->Id))->First();
 
         if($privilege == null){
-            $privilege = $this->Models->ShellUser->Create();
+            $privilege = $this->Models->ShellUserPrivilege->Create();
             $privilege->ShellUserId = $shellUser->Id;
             $privilege->ShellApplicationId = $shellApplication->Id;
             $privilege->UserLevel = $shellApplication->DefaultUserLevel;
@@ -106,6 +105,7 @@ class UserController extends BaseController
             return $this->Error('Invalid access token');
         }
 
+        return $this->Response('Lol');
         $shellUser = $this->Models->ShellUser->Find($accessToken->ShellUserPrivilege->ShellUserId);
         if($shellUser == null){
             return $this->Error('Failed to associate access token with a user');
@@ -128,11 +128,33 @@ class UserController extends BaseController
         }
 
         if($id == null){
-            return $this->Error('No id specified');
+            $result = array();
+            $users = $this->Models->ShellUser->Where(array('IsDeleted' => 0));
+            foreach($users as $user){
+                $result[] = $user->Clean();
+            }
+            return $this->Response($result);
+        }else {
+            $shellUser = $this->Models->ShellUser->Find($id);
+            return $this->Response(array($shellUser->Clean()));
+        }
+    }
+
+    public function GetLocalUsers()
+    {
+        $application = $this->ValidateApplication();
+        if($application == null){
+            return $this->InvalidApplication();
         }
 
-        $shellUser = $this->Models->ShellUser->Find($id);
-        return $this->Response($shellUser->Clean());
+        $userPrivileges = $this->Models->ShellUserPrivilege->Where(array('ShellApplicationId' => $application->Id));
+
+        $result = array();
+        foreach($userPrivileges as $privilege){
+            $result[] = $privilege->GetUserSummary();
+        }
+
+        return $this->Response($result);
     }
 
     public function SetPrivilegeLevel()
@@ -142,7 +164,12 @@ class UserController extends BaseController
             return $this->InvalidApplication();
         }
 
-        $shellApplicationId = $this->PayLoad['ShellUserPrivilege']['ShellApplicationId'];
+        if(isset($this->PayLoad['ShellUserPrivilege']['ShellApplicationId'])) {
+            $shellApplicationId = $this->PayLoad['ShellUserPrivilege']['ShellApplicationId'];
+        }else{
+            $shellApplicationId = $application->Id;
+        }
+
         $shellUserId = $this->PayLoad['ShellUserPrivilege']['UserId'];
         $userLevel = $this->PayLoad['ShellUserPrivilege']['UserLevel'];
 
