@@ -43,10 +43,63 @@ class ApplicationController extends BaseController
 
         $shellApplication = $this->Models->ShellApplication->Create();
         $shellApplication->ApplicationName = $applicationName;
+        $shellApplication->RsaPublicKey = $this->PayLoad['ShellApplication']['RsaPublicKey'];
+        $shellApplication->RsaPrivateKey = $this->PayLoad['ShellApplication']['RsaPrivateKey'];
+        $shellApplication->IsInactive = $this->PayLoad['ShellApplication']['IsInactive'];
+        $shellApplication->DefaultUserLevel = $this->PayLoad['ShellApplication']['DefaultUserLevel'];
+        $shellApplication->Save();
+
+        return $this->Response($shellApplication->Clean());
+    }
+
+    public function Edit()
+    {
+        $application = $this->ValidateApplication();
+        if($application == null){
+            return $this->InvalidApplication();
+        }
+
+        $shellApplicationId = $this->PayLoad['ShellApplication']['Id'];
+        $shellApplication = $this->Models->ShellApplication->Find($shellApplicationId);
+
+        if($shellApplication == null){
+            return $this->Error('Application not found');
+        }
+
+        $shellApplication->ApplicationName = $this->PayLoad['ShellApplication']['ApplicationName'];;
+        $shellApplication->RsaPublicKey = $this->PayLoad['ShellApplication']['RsaPublicKey'];
+        $shellApplication->DefaultUserLevel = $this->PayLoad['ShellApplication']['DefaultUserLevel'];
+
+        if(isset($this->PayLoad['ShellApplication']['IsInactive'])){
+            $shellApplication->IsInactive = $this->PayLoad['ShellApplication']['IsInactive'];
+        }else{
+            $shellApplication->IsInactive = 0;
+        }
 
         $shellApplication->Save();
 
         return $this->Response($shellApplication->Clean());
+    }
+
+    public function Delete()
+    {
+        $application = $this->ValidateApplication();
+        if($application == null){
+            return $this->InvalidApplication();
+        }
+
+        $shellApplicationId = $this->PayLoad;
+        $shellApplication = $this->Models->ShellApplication->Find($shellApplicationId);
+
+        if($shellApplication == null){
+            return $this->Error('Application not found');
+        }else{
+
+            $shellApplication->IsDeleted = 1;
+            $shellApplication->Save();
+
+            return $this->Response($application->Clean());
+        }
     }
 
     public function Get()
