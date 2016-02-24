@@ -224,4 +224,9 @@ class Collection implements IDataCollection
             return null;
         }
     }
+
+    public function __debugInfo()
+    {
+        return $this->m_items;
+    }
 }

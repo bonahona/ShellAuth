@@ -24,6 +24,56 @@ class UserController extends BaseController
         return $this->Response($shellUser->Clean());
     }
 
+    public function Edit()
+    {
+        $shellApplication = $this->ValidateApplication();
+        if($shellApplication == null){
+            return $this->InvalidApplication();
+        }
+
+        $shellUserId = $this->PayLoad['ShellUser']['Id'];
+        $shellUser = $this->Models->ShellUser->Find($shellUserId);
+
+        if($shellUser == null){
+            return $this->Error('User not found');
+        }
+
+        if(isset($this->PayLoad['ShellUser']['Username'])) {
+            $shellUser->Username = $this->PayLoad['ShellUser']['Username'];
+        }
+
+        if(isset($this->PayLoad['ShellUser']['DisplayName'])){
+            $shellUser->DisplayName = $this->PayLoad['ShellUser']['DisplayName'];
+        }
+
+        if(isset($this->PayLoad['ShellUser']['IsInactive'])) {
+            $shellUser->IsInactive = $this->PayLoad['ShellUser']['IsInactive'];
+        }
+
+        $shellUser->Save();
+
+        return $this->Response($shellUser->Clean());
+    }
+
+    public function ResetPassword()
+    {
+        $shellApplication = $this->ValidateApplication();
+        if($shellApplication == null){
+            return $this->InvalidApplication();
+        }
+
+        $shellUserId = $this->PayLoad['ShellUser']['Id'];
+        $shellUser = $this->Models->ShellUser->Find($shellUserId);
+        if($shellUser == null){
+            return $this->Error('User not found');
+        }
+
+        $password = $this->PayLoad['ShellUser']['Password'];
+        $shellUser->CreatePassword($password);
+        $shellUser->Save();
+        return $this->Response($shellUser->Clean());
+    }
+
     public function Login()
     {
         $shellApplication = $this->ValidateApplication();
@@ -131,12 +181,12 @@ class UserController extends BaseController
             $result = array();
             $users = $this->Models->ShellUser->Where(array('IsDeleted' => 0));
             foreach($users as $user){
-                $result[] = $user->Clean();
+                $result[] = $user->Summary();
             }
             return $this->Response($result);
         }else {
             $shellUser = $this->Models->ShellUser->Find($id);
-            return $this->Response(array($shellUser->Clean()));
+            return $this->Response(array($shellUser->Summary()));
         }
     }
 
@@ -147,11 +197,22 @@ class UserController extends BaseController
             return $this->InvalidApplication();
         }
 
-        $userPrivileges = $this->Models->ShellUserPrivilege->Where(array('ShellApplicationId' => $application->Id));
+        $users = $this->Models->ShellUser->Where(array('IsDeleted' => 0));
 
-        $result = array();
-        foreach($userPrivileges as $privilege){
-            $result[] = $privilege->GetUserSummary();
+        $result = [];
+
+        foreach($users as $user){
+            $userPrivilege = $user->ShellUserPrivileges->Where(array('ShellApplicationId' => $application->Id))->First();
+
+            if($userPrivilege == null) {
+                $userPrivilege                     = $this->Models->ShellUserPrivilege->Create();
+                $userPrivilege->ShellUserId        = $user->Id;
+                $userPrivilege->ShellApplicationId = $application->Id;
+                $userPrivilege->UserLevel          = $application->DefaultUserLevel;
+                $userPrivilege->RefreshModelReferences();
+            }
+
+            $result[] = $userPrivilege->GetUserSummary();
         }
 
         return $this->Response($result);
@@ -170,10 +231,11 @@ class UserController extends BaseController
             $shellApplicationId = $application->Id;
         }
 
-        $shellUserId = $this->PayLoad['ShellUserPrivilege']['UserId'];
+        $shellUserId = $this->PayLoad['ShellUserPrivilege']['ShellUserId'];
         $userLevel = $this->PayLoad['ShellUserPrivilege']['UserLevel'];
 
-        $shellUserPrivilege = $this->Models->ShellUserPrivilege->Where(array('ShellUserId' => $shellUserId, 'ShellApplication' => $shellApplicationId))->First();
+
+        $shellUserPrivilege = $this->Models->ShellUserPrivilege->Where(array('ShellUserId' => $shellUserId, 'ShellApplicationId' => $shellApplicationId))->First();
         if($shellUserPrivilege == null){
             $shellUserPrivilege = $this->Models->ShellUserPrivilege->Create();
             $shellUserPrivilege->ShellApplicationId = $shellApplicationId;
@@ -182,6 +244,8 @@ class UserController extends BaseController
 
         $shellUserPrivilege->UserLevel = $userLevel;
         $shellUserPrivilege->Save();
+
+        return $this->Response($shellUserPrivilege->Clean());
     }
 
     protected function CreateActionLogEntry($shellUser, $shellApplication, $action)

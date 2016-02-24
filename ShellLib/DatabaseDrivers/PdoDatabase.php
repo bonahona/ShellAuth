@@ -353,7 +353,8 @@ class PdoDatabase implements IDatabaseDriver
         $sqlStatement = "INSERT INTO $tableName($columns) VALUES($valuePlaceHolders);";
 
         if(!$preparedStatement = $this->Database->prepare($sqlStatement)){
-            echo "Failed to prepare PDO statement";
+            echo "Failed to prepare PDO statement\n";
+            echo $sqlStatement . "\n";
             var_dump($this->Database->errorInfo());
         }
 
@@ -368,7 +369,8 @@ class PdoDatabase implements IDatabaseDriver
         }
 
         if(!$preparedStatement->execute($params)){
-            echo "Failed to execute PDO statement";
+            echo "Failed to execute PDO statement\n";
+            echo $sqlStatement . "\n";
             var_dump($this->Database->errorInfo());
         }
 

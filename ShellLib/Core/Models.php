@@ -45,7 +45,8 @@ class Models
 
     public function GetModelForName($modelName)
     {
-        return $this->ModelCollections[$modelName];
+        $result = $this->ModelCollections[$modelName];
+        return $result;
     }
 
     public function GetModelNameForTable($tableName)

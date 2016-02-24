@@ -24,7 +24,7 @@ class ModelProxyCollection
         }
 
         if($this->Collection == null){
-                $this->Collection = $this->Model->Where(array($this->LocalModelField => $this->LocalModelId));
+            $this->Collection = $this->Model->Where(array($this->ForeignKey => $this->LocalModelId));
         }
     }
 }

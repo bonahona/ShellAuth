@@ -4,7 +4,7 @@ class Model
     protected $ModelCollection;
     protected $IsSaved;                 // Is this object inserted into the database
     protected $IsDirty;                 // Has this object been changed in any way since its last save to the database
-    protected $Properties;              // Properties matched in db
+    public $Properties;              // Properties matched in db
     protected $References;              // Model proxy objects for references
     protected $ReferenceCollections;    // List of other objects referring to this one
     protected $CustomProperties;        // Custom properties added from without the db. Wont be saved back
@@ -27,6 +27,17 @@ class Model
             $this->Properties[$column['Field']] = $column['Default'];
         }
 
+        $this->SetupModelReferences($modelCollection);
+
+        // Create a way to handle custom properties
+        $this->CustomProperties = array();
+
+        $this->IsSaved = false;
+        $this->IsDirty = false;
+    }
+
+    protected function SetupModelReferences($modelCollection)
+    {
         // Setup references
         $this->References = array();
         foreach($modelCollection->ModelCache['References'] as $key => $column){
@@ -43,12 +54,12 @@ class Model
             $model = $this->Models->GetModelForName($modelName);
             $this->ReferenceCollections[$key] = new ModelProxyCollection($column['Field'], $model, $column['TableColumn']);
         }
+    }
 
-        // Create a way to handle custom properties
-        $this->CustomProperties = array();
-
-        $this->IsSaved = false;
-        $this->IsDirty = false;
+    public function RefreshModelReferences()
+    {
+        $this->SetupModelReferences($this->ModelCollection);
+        $this->OnLoad();
     }
 
     public function OnLoad()
@@ -112,6 +123,11 @@ class Model
         }else{
             $this->CustomProperties[$propertyName] = $value;
         }
+    }
+
+    function __debugInfo()
+    {
+        return array();
     }
 
     public function IsSaved()

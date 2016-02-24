@@ -23,8 +23,9 @@ class ShellUser extends Model
         $result = $this->Clean();
 
         $result['ShellUserPrivileges'] = array();
-        foreach($this->ReferenceCollections['ShellUserPrivileges'] as $privilege){
-            $result['ShellUserPrivileges'][] = $privilege->Summary();
+
+        foreach($this->ShellUserPrivileges as $privilege){
+            $result['ShellUserPrivileges'][] = $privilege->Clean();
         }
 
         return $result;
