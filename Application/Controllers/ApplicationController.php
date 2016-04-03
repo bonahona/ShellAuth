@@ -46,7 +46,14 @@ class ApplicationController extends BaseController
         $shellApplication->RsaPublicKey = $this->PayLoad['ShellApplication']['RsaPublicKey'];
         $shellApplication->RsaPrivateKey = $this->PayLoad['ShellApplication']['RsaPrivateKey'];
         $shellApplication->IsInactive = $this->PayLoad['ShellApplication']['IsInactive'];
+		if($shellApplication->IsInactive == null){
+			$shellApplication->IsInactive = 0;
+		}
+
+		$shellApplication->IsDeleted = 0;
         $shellApplication->DefaultUserLevel = $this->PayLoad['ShellApplication']['DefaultUserLevel'];
+		
+		print_r($shellApplication->Properties);
         $shellApplication->Save();
 
         return $this->Response($shellApplication->Clean());
