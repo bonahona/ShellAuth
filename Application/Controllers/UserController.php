@@ -190,6 +190,38 @@ class UserController extends BaseController
         }
     }
 
+    public function GetUserApplicationPrivileges()
+    {
+        $application = $this->ValidateApplication();
+        if($application == null){
+            return $this->InvalidApplication();
+        }
+
+        if(isset($this->PayLoad['Id'])){
+            $id = $this->PayLoad['Id'];
+        }else{
+            $id = null;
+        }
+
+        if($id == null){
+            return $this->Error('Missing Id');
+        }
+
+        $user = $this->Models->ShellUser->Where(array('Id' => $id, 'IsDeleted' => 0))->First();
+
+        if($user == null){
+            return $this->Error('No user found');
+        }
+
+        $applicationPrivilege = $user->ShellUserPrivileges->Where(array('ShellApplicationId' => $application->Id))->First();
+
+        if($applicationPrivilege == null){
+            return $this->Error('No privileges found');
+        }
+
+        return $this->Response($applicationPrivilege->Object());
+    }
+
     public function GetLocalUsers()
     {
         $application = $this->ValidateApplication();
