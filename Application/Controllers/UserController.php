@@ -110,15 +110,18 @@ class UserController extends BaseController
             return $this->Error('Insufficient privileges');
         }
 
+		
         // Create an access token and return that back to the user
         $accessToken = $this->Models->ShellUserAccessToken->Create();
         $accessToken->ShellUserPrivilegeId = $privilege->Id;
         $accessToken->Guid = uniqid('', true);
-        $accessToken->Issued = date('Y-m-d H:M');
+        $accessToken->Issued = date('Y-m-d G:i');
+		$accessToken->Expires = date('Y-m-d G:i', strtotime('+1 months'));
         $accessToken->Save();
+		
 
         $this->CreateActionLogEntry($shellUser, $shellApplication, 'Login');
-
+		
         return $this->Response(array(
             'AccessToken' => $accessToken->Guid,
             'User' => $shellUser->Clean()
