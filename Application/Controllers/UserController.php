@@ -222,7 +222,7 @@ class UserController extends BaseController
             return $this->Error('No privileges found');
         }
 
-        return $this->Response($applicationPrivilege->Object());
+        return $this->Response($applicationPrivilege->Clean());
     }
 
     public function GetLocalUsers()
