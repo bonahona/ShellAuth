@@ -1,33 +1,79 @@
 <?php
 
-define('DEFAULT_MIME_TYPE', 'text/html');
-define('DEFAULT_RETURN_CODE', '200');
+const DEFAULT_MIME_TYPE = 'text/html';
+const DEFAULT_RETURN_CODE = '200';
 
 class Controller
 {
     // State data
+    /* @var string */
     public $Action;
+
+    /* @var string */
     public $Controller;
+
+    /* @var string */
     public $Verb;
+
+    /* @var string */
     public $RequestUri;
+
+    /* @var string */
     public $RequestString;
+
+    /* @var array */
     public $Parameters = array();        // Stores all parameters sent in in the uri that follow the Controller and Action
+
+    /* @var Models */
     public $Models;
+
+    /* @var FormHelper */
     public $Form;
+
+    /* @var HtmlHelper */
     public $Html;
-    public $ModelJsonParse;              // Helper to parse JSON data directly into a model object
+
+    /* @var ModelValidationHelper */
     public $ModelValidation;
+
+    /* @var Core */
     public $Core;                       // Main core for this controller
-    public $CurrentCore;                // Should usually be the same one as the Core, bit might, during rendering, be set to some other one for resource purposes
+
+    /* @var Core */
+    public $CurrentCore;                // Should usually be the same one as the Core, but might during rendering, be set to some other one for resource purposes
+
+    /* @var array */
     public $Config;
 
+    /* @var Helpers */
+    public $Helpers;                    // Reference the main core's helpers list
+
+    /* @var Logging */
+    public $Logging;
+
+    /* @var Cache */
+    public $Cache;                      // Reference to the Core's cache object
+
     // Data sent
+    /* @var DataHelper */
     public $Post;                       // Stores all Post data variables sent in
+
+    /* @var DataHelper */
     public $Get;                        // Stores all get variables sent in
+
+    /* @var DataHelper */
     public $Data;                       // Stores both the Get and Post variables
+
+    /* @var DataHelper */
     public $Files;                      // Stores any files sent with the request
-    public $Session;                    // Stores all the session data
+
+    /* @var SessionHelper */
+    public $Session = array();          // Stores all the session data
+
+    /* @var array */
     public $Cookies = array();          // Stores all cookies sent
+
+    /* @var string */
     public $Server = array();           // Stores all server variables
 
     // Response data
@@ -36,15 +82,18 @@ class Controller
     public $Title;
     public $Layout;
 
-    // Data that will be used in the view
+    // Data that will/can be used in the view
     public $ViewData = array();
+
+    // Can be used to queue scripts from controller fiels and then be read in the view and/or layout
+    public $JavascriptFiles = array();
+    public $CssFiles = array();
 
     function __construct(){
 
         // Init the helpers
         $this->Form = new FormHelper($this);
         $this->Html = new HtmlHelper($this);
-        $this->ModelJsonParse = new ModelJsonParseHelper($this);
         $this->ModelValidation = new ModelValidationHelper();
 
         $this->ReturnCode = DEFAULT_RETURN_CODE;
@@ -57,7 +106,7 @@ class Controller
         $this->Session = new SessionHelper();
     }
 
-    public function GetCore()
+    public  function GetCore()
     {
         return $this->Core;
     }
@@ -72,11 +121,16 @@ class Controller
         return $this->ViewData;
     }
 
-    public function IsPost(){
+    public function GetBody()
+    {
+        return file_get_contents('php://input');
+    }
+
+    protected function IsPost(){
         return ($this->Verb == "POST");
     }
 
-    public function IsGet()
+    protected function IsGet()
     {
         return ($this->Verb == "GET");
     }
@@ -98,10 +152,8 @@ class Controller
         $partialViewName = PartialViewPath($this->Core, $viewName);
 
         if(!file_exists($partialViewName)){
-            die('Partial view missing ' . $partialViewName);
+            trigger_error('Partial view missing ' . $partialViewName, E_USER_ERROR);
         }
-
-        $this->BeforeRender();
 
         if($partialViewVars != null){
             if(is_array($partialViewVars)) {
@@ -109,7 +161,7 @@ class Controller
                     $$key = $var;
                 }
             }else{
-                die('$PartialViewVars is not an array');
+                trigger_error('$PartialViewVars is not an array', E_USER_ERROR);
             }
         }
         include($partialViewName);
@@ -118,6 +170,10 @@ class Controller
     // Different ways to render something
     protected function View($viewName = null){
 
+        $httpResult = new HttpResult();
+        $httpResult->ReturnCode = $this->ReturnCode;
+        $httpResult->MimeType = $this->MimeType;
+
         if($viewName == null){
             $viewName = $this->Action;
         }
@@ -125,7 +181,7 @@ class Controller
         // Make sure the view exists
         $viewPath = ViewPath($this->Core, $this->Controller, $viewName);
         if(!file_exists($viewPath)) {
-            die('Could not find view ' . $viewPath);
+            trigger_error('Could not find view ' . $viewPath, E_USER_ERROR);
         }
 
         // Enable all the the view variables to be available in the view
@@ -143,8 +199,8 @@ class Controller
         $layouts = $this->GetLayoutPaths();
 
         if(empty($layouts)){
-            echo $view;
-            return;
+            $httpResult->Content = $view;
+            return $httpResult;
         }
 
         // Go through the layout candidate files in order and make sure they exists. The first match will act as the layout for this view
@@ -158,49 +214,72 @@ class Controller
         }
 
         if($foundLayout == null){
-            echo $view;
+            $httpResult->Content = $view;
         }else{
             $this->CurrentCore = $foundLayout['core'];
+            ob_start();
             include($foundLayout['layout']);
+            $layoutView = ob_get_clean();
             $this->CurrentCore = $this->Core;
+
+            $httpResult->Content = $layoutView;
         }
+
+        return $httpResult;
     }
 
     protected function Json($data){
-        header('Content-Type: application/json');
-        echo json_encode($data);
+        $result = new HttpResult();
+        $result->MimeType = 'application/json';
+        $result->Content = json_encode($data);
+
+        return $result;
     }
 
-    protected function Redirect($url, $vars = null, $code = 300){
+    protected function Text($text)
+    {
+        $result = new HttpResult();
+        $result->MimeType = 'text/plain';
+        $result->Content = $text;
+        return $result;
+    }
 
+    protected function Http($text)
+    {
+        $result = new HttpResult();
+        $result->MimeType = 'text/html';
+        $result->Content = $text;
+        return $result;
+    }
+
+    protected function Redirect($url, $vars = null, $code = 301){
+
+        $locationString = '';
         if($vars != null){
             $queryParts = array();
             foreach($vars as $key => $value){
                 $queryParts[] = "$key=$value";
                 $queryString = implode(',', $queryParts);
-
-                header('Location:' . Url($url . '?' . $queryString));
+                $locationString = Url($url . '?' . $queryString);
             }
         }else {
-            header('Location: ' . Url($url));
+            $locationString =  Url($url);
         }
 
-        // Make sure nothing more gets written to the stream
-        http_response_code($code);
-        exit;
+        $result = new HttpResult();
+        $result->Location = $locationString;
+        $result->ReturnCode = $code;
+
+        return $result;
     }
 
-    protected function SetType($type){
-        header('Content-Type: ' . $type);
-    }
-
-    protected function HttpStatus($statusCode)
+    protected function HttpStatus($statusCode, $text = "")
     {
-        if(function_exists('http_response_code')) {
-            http_response_code("404");
-        }else{
-            echo "404";
-        }
+        $result = new HttpResult();
+        $result->ReturnCode = $statusCode;
+        $result->Content = $text;
+
+        return $result;
     }
 
     function HttpNotFound()
@@ -272,7 +351,7 @@ class Controller
         }
     }
 
-    public function GetCurrentUser()
+    protected function GetCurrentUser()
     {
         if(isset($this->Session['CurrentUser'])){
             return $this->Session['CurrentUser'];
@@ -281,12 +360,55 @@ class Controller
         }
     }
 
+    protected function EnqueueJavascript($javascriptFile)
+    {
+        $this->JavascriptFiles[] = $javascriptFile . "\n";
+    }
+
+    protected function EnqueueCssFiles($cssFiles)
+    {
+        $this->CssFiles[] = $cssFiles;
+    }
+
+    protected function ClearJavascript()
+    {
+        $this->JavascriptFiles = array();
+    }
+
+    protected function ClearCss()
+    {
+        $this->CssFiles = array();
+    }
+
     // Function is called before the actions is
     public function BeforeAction(){
     }
 
     // Function is called after the action but before the page is rendered
-    public function BeforeRender(){
-        header('Content-Type: ' . $this->MimeType);
+    protected function BeforeRender(){
+    }
+
+    // Adds a request identifier to the list of cached output for automatic output cache handling
+    protected function EnableOutputCacheFor($requestData, $validity)
+    {
+
+    }
+
+    // Manual adding of an output cache entry or updates an existing one
+    protected function AddOutputCache($requestData, $output, $validity)
+    {
+
+    }
+
+    // Manual invalidation
+    protected function InvalidateOutputCache($requestData)
+    {
+
+    }
+
+    // Manual check for a cache entry
+    protected function IsOutputCached($requestData)
+    {
+
     }
 }

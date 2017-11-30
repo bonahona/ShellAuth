@@ -53,6 +53,12 @@ class FormHelper
             $value = $this->ParseValue($name);
         }
 
+        if(isset($options['index'])){
+            $index = $options['index'];
+        }else{
+            $index = null;
+        }
+
         // Passwords are not to be auto filled
         if($type == 'password'){
             $value = "";
@@ -70,7 +76,7 @@ class FormHelper
         }
 
         $id = $name;
-        $name = $this->ParseName($name);
+        $name = $this->ParseName($name, $index);
 
         if($type == 'select'){
             return $this->Select();
@@ -78,6 +84,17 @@ class FormHelper
             $result = "<input name=\"$name\" id=\"$id\" value=\"$value\" type=\"$type\" $attributes/>";
             return $result;
         }
+    }
+
+    public function IndexedInput($name, $index, $options = null)
+    {
+        if($options == null){
+            $options = array();
+        }
+
+        $options['index'] = $index;
+
+        return $this->Input($name, $options);
     }
 
     public function Password($name, $options = null)
@@ -133,7 +150,7 @@ class FormHelper
     public function Select($name, $list, $options = null)
     {
         if(!is_array($list) && !$list instanceof Collection){
-            die('In Formhelper->Select. List is not an array nor Collection');
+            trigger_error("List $name is not an array nor Collection", E_USER_WARNING);
         }
 
         if($options == null){
@@ -152,6 +169,12 @@ class FormHelper
             $valueIndex = 'Value';
         }
 
+        if(isset($options['nullfield'])){
+            $useNullField = $options['nullfield'];
+        }else{
+            $useNullField = false;
+        }
+
         if(isset($options['attributes'])){
             $attributes = $this->ParseAttributes($options['attributes']);
         }else{
@@ -160,20 +183,29 @@ class FormHelper
 
         $value = $this->ParseValue($name);
 
-
         $id = $name;
         $name = $this->ParseName($name);
         $result = "<select id=\"$id\" name=\"$name\" $attributes>\n";
 
-        foreach($list as $item){
 
-            if(is_array($list)) {
-                if ($item[$keyIndex] == $value) {
-                    $result .= "<option value=\"$item[$keyIndex]\" selected=\"\">$item[$valueIndex]</option>\n";
+        if($useNullField){
+            if(is_array($list)){
+                $result .= "<option value=\"-1\">-None-</option>\n";
+            }else{
+                $result .= "<option value=\"NULL\" selected=\"\">-None-</option>\n";
+            }
+        }
+
+        if(is_array($list)){
+            foreach($list as $key => $item) {
+                if ($key == $value) {
+                    $result .= "<option value=\"$key\" selected=\"\">$item</option>\n";
                 }else{
-                    $result .= "<option value=\"$item[$keyIndex]\" >$item[$valueIndex]</option>\n";
+                    $result .= "<option value=\"$key\" >$item</option>\n";
                 }
-            }else if($list instanceof Collection){
+            }
+        }else if($list instanceof Collection){
+            foreach($list as $item) {
                 $itemKey = $item->$keyIndex;
                 $itemValue = $item->$valueIndex;
 
@@ -235,7 +267,7 @@ class FormHelper
     public function End()
     {
         if($this->m_currentForm == null){
-            die('No form is currently open');
+            trigger_error('No form is currently open', E_USER_WARNING);
         }else{
             $this->m_currentForm = null;
             return "</form>\n";
@@ -254,16 +286,21 @@ class FormHelper
             if(is_a($viewVar, 'Model') && $viewData[$this->m_currentForm]->HasProperty($name)) {
                 return $viewVar->$name;
             }else if(is_array($viewVar)){
-                return $viewData[$name];
+                return $viewVar[$name];
             }
         }else{
             return "";
         }
     }
 
-    private function ParseName($name)
+    private function ParseName($name, $index = null)
     {
-        $result = "data[$this->m_currentForm][$name]";
+        if($index == null){
+            $result = "data[$this->m_currentForm][$name]";
+        }else{
+            $result = "data[$this->m_currentForm][$index][$name]";
+        }
+
         return $result;
     }
 
@@ -274,7 +311,7 @@ class FormHelper
         };
 
         if(!is_array($attributes)){
-            die("Attributes is not an array");
+            trigger_error("Attributes is not an array", E_USER_WARNING);
         }
 
         $attributeArray = array();

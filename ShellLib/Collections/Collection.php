@@ -19,6 +19,13 @@ class Collection implements IDataCollection
         }
     }
 
+    public function CopyTo($collection)
+    {
+        foreach($this->m_items as $item){
+            $collection->Add($item);
+        }
+    }
+
     function rewind()
     {
         $this->m_position = 0;
@@ -59,15 +66,37 @@ class Collection implements IDataCollection
         $this->m_items[] = $item;
     }
 
+    public function AddRange($items)
+    {
+        foreach($items as $item)
+        {
+            $this->Add($item);
+        }
+    }
+
+    public function InsertAt($index, $item)
+    {
+        $size = count($this->m_items);
+        if($index >  $size){
+            $this->Add($item);
+            return;
+        }
+
+        $elementToMove = $size - $index;
+        $this->ShiftDown($index, $elementToMove);
+        $this->m_items[$index] = $item;
+    }
+
     public function OrderBy($field)
     {
-        $tmpArray = $this->m_items;
-        $this->quickSort($tmpArray, $field);
+        $customObjectSorter = new CustomObjectSorter();
+        return $customObjectSorter->SortCollection($this->m_items, $field);
+    }
 
-        $result = new Collection();
-        $result->Copy($this->m_items);
-
-        return $result;
+    public function OrderByDescending($field)
+    {
+        $customObjectSorter = new CustomObjectSorter();
+        return $customObjectSorter->SortCollection($this->m_items, $field, Descending);
     }
 
     public function Where($conditions)
@@ -80,6 +109,18 @@ class Collection implements IDataCollection
             }
         }
 
+        return $result;
+    }
+
+    public function WhereNot($conditions)
+    {
+        $result = new Collection();
+
+        foreach($this->m_items as $item){
+            if(!$this->CheckConditions($conditions, $item)){
+                $result->Add($item);
+            }
+        }
         return $result;
     }
 
@@ -128,66 +169,6 @@ class Collection implements IDataCollection
         }
     }
 
-    // Taken from http://stackoverflow.com/questions/1462503/sort-array-by-object-property-in-php
-    private function quickSort(&$array, $field)
-    {
-        if(count($array) == 0){
-            return;
-        }
-
-        $cur = 1;
-        $stack[1]['l'] = 0;
-        $stack[1]['r'] = count($array)-1;
-
-        do
-        {
-            $l = $stack[$cur]['l'];
-            $r = $stack[$cur]['r'];
-            $cur--;
-
-            do
-            {
-                $i = $l;
-                $j = $r;
-                $tmp = $array[(int)( ($l+$r)/2 )];
-
-                // partion the array in two parts.
-                // left from $tmp are with smaller values,
-                // right from $tmp are with bigger ones
-                do
-                {
-                    while( $array[$i]->$field < $tmp->$field )
-                        $i++;
-
-                    while( $tmp->$field < $array[$j]->$field )
-                        $j--;
-
-                    // swap elements from the two sides
-                    if( $i <= $j)
-                    {
-                        $w = $array[$i];
-                        $array[$i] = $array[$j];
-                        $array[$j] = $w;
-
-                        $i++;
-                        $j--;
-                    }
-
-                }while( $i <= $j );
-
-                if( $i < $r )
-                {
-                    $cur++;
-                    $stack[$cur]['l'] = $i;
-                    $stack[$cur]['r'] = $r;
-                }
-                $r = $j;
-
-            }while( $l < $r );
-
-        }while( $cur != 0 );
-    }
-
     public function First()
     {
         if(count($this->m_items) > 0){
@@ -225,8 +206,14 @@ class Collection implements IDataCollection
         }
     }
 
-    public function __debugInfo()
+    protected function ShiftDown($startIndex, $count)
     {
-        return $this->m_items;
+        if($count == 0){
+            return;
+        }
+
+        for($i = $startIndex + $count; $i > $startIndex; $i --){
+            $this->m_items[$i] = $this->m_items[$i -1];
+        }
     }
 }

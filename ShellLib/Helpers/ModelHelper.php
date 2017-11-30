@@ -26,7 +26,7 @@ class ModelHelper
         if(array_key_exists($tableName, $this->TableNames)){
             return $this->TableNames[$tableName];
         }else{
-            die("Missing table is ModelHelper::GetModelName lookup");
+            trigger_error("Missing model entry for table $tableName", E_USER_WARNING);
         }
     }
 
@@ -38,7 +38,7 @@ class ModelHelper
             }
         }
 
-        die('Missing table is ModelHelper::GetTableName lookup: ' . $modelName);
+        trigger_error("Missing table entry for model $modelName", E_USER_WARNING);
     }
 
     public function GetModelFilePath($modelPath) {
@@ -62,11 +62,14 @@ class ModelHelper
         $modelInstance = new $modelName(NULL);
         $tableName     = $modelInstance->TableName;
 
-        $db = Core::$Instance->GetDatabase();
+        $coreInstanceProperty = new ReflectionProperty(CORE_CLASS, 'Instance');
+        $coreInstance =  $coreInstanceProperty->getValue();
+
+        $db = $coreInstance->GetDatabase();
 
         $response = $db->DescribeTable($tableName);
         if ($response == NULL) {
-            die("Missing table " . $tableName);
+            trigger_error("Missing table " . $tableName, E_USER_ERROR);
         }
 
         // Find references to other tables
@@ -81,10 +84,9 @@ class ModelHelper
             $saveResult = file_put_contents($filePath, json_encode($response));
 
             if ($saveResult == false) {
-                die("Failed to save model " . $modelName);
+                trigger_error("Failed to save model cache " . $modelName, E_USER_WARNING);
             }
         }
-
 
         $modelCache             = &Core::$Instance->GetModelCache();
         $modelCache[$modelName] = $response;
@@ -102,7 +104,10 @@ class ModelHelper
         $modelName = str_replace(PHP_FILE_ENDING, '', $modelName);
         $buffer    = file_get_contents($filePath);
 
-        $modelCache             = &Core::$Instance->GetModelCache();
+        $coreInstanceProperty = new ReflectionProperty(CORE_CLASS, 'Instance');
+        $coreInstance =  $coreInstanceProperty->getValue();
+
+        $modelCache             = &$coreInstance->GetModelCache();
         $result                 = json_decode($buffer, true);
         $modelCache[$modelName] = $result;
 
@@ -116,7 +121,7 @@ class ModelHelper
         $saveResult = file_put_contents($filePath, json_encode($modelData));
 
         if ($saveResult == false) {
-            die("Failed to save model " . $modelName);
+            trigger_error("Failed to save model " . $modelName, E_USER_WARNING);
         }
     }
 
@@ -135,16 +140,14 @@ class ModelHelper
         $tableName = $this->GetTableName($modelName);
         if(array_key_exists($tableName, $this->TableReferences)){
             foreach($this->TableReferences[$tableName] as $reference){
-                $remoteTableName = $this->GetTableName($reference['ModelName']);
-                $reference['TableName'] = $remoteTableName;
                 $referencePluralForm = $pluralizer->Pluralize($reference['ModelName']);
                 $modelCache['ReversedReferences'][$referencePluralForm] = $reference;
             }
         }
     }
 
-    protected function AddTableReference($modelName, $tableName, $reference)
-    {
+    protected function AddTableReference($modelName, $tableName, $reference) {
+
         $reference['ModelName'] = $modelName;
         if (!array_key_exists($tableName, $this->TableReferences)) {
             $this->TableReferences[$tableName] = array();

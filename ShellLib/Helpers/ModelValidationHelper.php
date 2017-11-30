@@ -34,7 +34,7 @@ class ModelValidationHelper
         return empty($this->m_errors);
     }
 
-    public function AddError($model, $property, $error)
+    public function AddError($model, $property, $errors)
     {
         if(!isset($this->m_errors[$model])){
             $this->m_errors[$model] = array();
@@ -44,7 +44,13 @@ class ModelValidationHelper
             $this->m_errors[$model][$property] = array();
         }
 
-        $this->m_errors[$model][$property][] = $error;
+        if(is_array($errors)){
+            foreach($errors as $error){
+                $this->m_errors[$model][$property][] = $error;
+            }
+        }else {
+            $this->m_errors[$model][$property][] = $errors;
+        }
     }
 
     public function Clear()

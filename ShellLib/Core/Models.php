@@ -10,12 +10,13 @@ class Models
         $this->ModelNameLookupTable = array();
     }
 
+    /* @return ModelCollection */
     public function __get($modelName)
     {
         if(array_key_exists($modelName, $this->ModelCollections)){
             return $this->ModelCollections[$modelName];
         }else{
-            die("Model $modelName does not exists");
+            trigger_error("Model $modelName does not exists", E_USER_ERROR);
         }
     }
 
@@ -45,8 +46,15 @@ class Models
 
     public function GetModelForName($modelName)
     {
-        $result = $this->ModelCollections[$modelName];
-        return $result;
+        if(!array_key_exists($modelName, $this->ModelCollections)){
+            if($modelName == ''){
+                $modelName = '[Empty]';
+            }
+            trigger_error('Missing model for table name ' . $modelName, E_USER_WARNING);
+            return null;
+        }
+
+        return $this->ModelCollections[$modelName];
     }
 
     public function GetModelNameForTable($tableName)
@@ -54,5 +62,26 @@ class Models
         if(array_key_exists($tableName, $this->ModelNameLookupTable)){
             return $this->ModelNameLookupTable[$tableName];
         }
+
+        foreach($this->ModelNameLookupTable as $key => $value){
+            if($tableName == $value){
+                return $value;
+            }
+        }
+
+        if($tableName === null){
+            $tableName = '[null]';
+        }else if($tableName === ''){
+            $tableName = '[Empty]';
+        }
+
+        trigger_error('Missing model name for table name ' . $tableName, E_USER_WARNING);
+
+        return null;
+    }
+
+    public function GetAll()
+    {
+        return $this->ModelCollections;
     }
 }

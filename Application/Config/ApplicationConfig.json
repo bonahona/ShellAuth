@@ -9,14 +9,12 @@
     "FileDirectory": "/logs/",
     "Loggers": [
       {
+        "CacheLogger": {
+          "Name": "Cache"
+        },
         "FileLog": {
-          "Name": "Default",
-          "File": "default.log"
-        }
-      },
-      {
-        "DatabaseLog":{
-          "Name": "DbLog"
+          "Name": "File",
+          "FileName": "default.log"
         }
       }
     ]

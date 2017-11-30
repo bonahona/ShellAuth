@@ -1,8 +1,17 @@
 {
-  "Routes": {
-    "/TestRoute/":{
-      "Controller": "Controller",
-      "Action": "Action"
+  "Routes": [
+    {
+      "/{Controller}/{Action}/{...}": {
+        "Controller": "{Controller}",
+        "Action": "{Action}",
+        "Variables": "{...}"
+      }
+    }
+  ],
+  "Default": {
+    "Controller": "Projects",
+    "Action": "Index",
+    "Variables": {
     }
   }
 }
