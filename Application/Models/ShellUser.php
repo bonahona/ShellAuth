@@ -35,6 +35,7 @@ class ShellUser extends Model
     {
         $this->PasswordSalt = uniqid('', true);
         $this->PasswordHash = hash('sha256', $password . $this->PasswordSalt);
+        return $this;
     }
 
     public function ValidatePassword($password)

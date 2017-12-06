@@ -62,5 +62,16 @@ class DbCreation implements IDatabaseMigration
 
     public function Seed($migrator)
     {
+        $migrator->Models->ShellUser->Create(array(
+            'Username' => 'Admin',
+            'DisplayName' => 'Admin',
+            'IsActive' => 1
+        ))->CreatePassword('seed')->Save();
+
+        $migrator->Models->ShellUser->Create(array(
+            'Username' => 'Bona',
+            'DisplayName' => 'Admin',
+            'IsActive' => 1
+        ))->CreatePassword('seed')->Save();
     }
 }

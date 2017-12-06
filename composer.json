@@ -1,0 +1,6 @@
+{
+    "require": {
+        "webonyx/graphql-php": "^0.11.2",
+        "Youshido/GraphQL": "^1.5"
+    }
+}
