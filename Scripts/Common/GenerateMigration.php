@@ -37,7 +37,7 @@ function getFileName($fileName){
     if(!endsWith($fileName, '.php')){
         return $fileName . ' .php';
     }else {
-        return $fileName
+        return $fileName;
     }
 }
 
