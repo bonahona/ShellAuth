@@ -66,12 +66,12 @@ class DbCreation implements IDatabaseMigration
             'Username' => 'Admin',
             'DisplayName' => 'Admin',
             'IsActive' => 1
-        ))->CreatePassword('seed')->Save();
+        ))->CreatePassword('H3mligt')->Save();
 
         $migrator->Models->ShellUser->Create(array(
             'Username' => 'Bona',
-            'DisplayName' => 'Admin',
+            'DisplayName' => 'God Almighty',
             'IsActive' => 1
-        ))->CreatePassword('seed')->Save();
+        ))->CreatePassword('H3mligt')->Save();
     }
 }
