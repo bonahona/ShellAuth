@@ -1,14 +1,16 @@
 <?php
-use Youshido\GraphQL\Schema\Schema as Schema;
-use Youshido\GraphQL\Type\Object\ObjectType as ObjectType;
-use Youshido\GraphQL\Execution\Processor as Processor;
+use Youshido\GraphQL\Schema\Schema;
+use Youshido\GraphQL\Type\Object\ObjectType;
+use Youshido\GraphQL\Execution\Processor;
 
-
-require_once('./Application/Schema/UserObjectType.php');
-require_once('./Application/Schema/UserField.php');
-require_once('./Application/Schema/ApplicationObjectType.php');
-require_once('./Application/Schema/ApplicationField.php');
-
+require_once('./Application/Schema/SchemaBaseField.php');
+require_once('./Application/Schema/SchemaBaseType.php');
+require_once('./Application/Schema/ShellUserType.php');
+require_once('./Application/Schema/ShellUserField.php');
+require_once('./Application/Schema/ShellApplicationType.php');
+require_once('./Application/Schema/ShellApplicationField.php');
+require_once('./Application/Schema/ShellUserPrivilegeType.php');
+require_once('./Application/Schema/ShellUserPrivilegesField.php');
 class GraphQLController extends Controller
 {
     public $ApplicationSchema;
@@ -26,25 +28,17 @@ class GraphQLController extends Controller
     }
     public function Index()
     {
-        $rootQueryType = new ObjectType([
-            'fields' => [
+        $processor = new Processor(new Schema([
+            'query' => new ObjectType([
                 'name' => 'RootQueryType',
                 'fields' => [
-                    new ApplicationField()
+                    'ShellUser' => new ShellUserField($this->Models),
+                    'ShellApplication' => new ShellApplicationField($this->Models)
                 ]
-            ]
-        ]);
-
-        $processor = new Processor(new Schema([
-            'query' => $rootQueryType
+            ])
         ]));
 
-        return $this->Text($this->Getbody());
-
-        /*
         $queryString = $this->GetQueryString();
-        $queryString = '{ application { id, name } }';
         return $this->Json($processor->processPayload($queryString)->getResponseData());
-        */
     }
 }

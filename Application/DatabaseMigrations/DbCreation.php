@@ -73,5 +73,19 @@ class DbCreation implements IDatabaseMigration
             'DisplayName' => 'God Almighty',
             'IsActive' => 1
         ))->CreatePassword('H3mligt')->Save();
+
+        $migrator->Models->ShellApplication->Create(array(
+            'Name' => 'TestApplication',
+            'IsActive' => 1,
+            'DefaultUserLever' => 0,
+            'RsaPublicKey' => ""
+        ))->Save();
+
+        $migrator->Models->ShellApplication->Create(array(
+            'Name' => 'Auth',
+            'IsActive' => 1,
+            'DefaultUserLever' => 0,
+            'RsaPublicKey' => ""
+        ))->Save();
     }
 }

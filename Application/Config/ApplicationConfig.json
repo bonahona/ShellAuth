@@ -11,10 +11,6 @@
       {
         "CacheLogger": {
           "Name": "Cache"
-        },
-        "FileLog": {
-          "Name": "File",
-          "FileName": "default.log"
         }
       }
     ]
