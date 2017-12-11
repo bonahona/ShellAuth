@@ -10,7 +10,6 @@ require_once('./Application/Schema/ShellUserField.php');
 require_once('./Application/Schema/ShellApplicationType.php');
 require_once('./Application/Schema/ShellApplicationField.php');
 require_once('./Application/Schema/ShellUserPrivilegeType.php');
-require_once('./Application/Schema/ShellUserPrivilegesField.php');
 class GraphQLController extends Controller
 {
     public $ApplicationSchema;

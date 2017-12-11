@@ -15,7 +15,17 @@ class ShellApplicationType extends SchemaBaseType {
                 'IsActive' => new IntType(),
                 'DefaultUserLever' => new IntType(),
                 'RsaPublicKey' => new StringType(),
-                'Privileges' => new ShellUserPrivilegesField($this->Models)
+                'Privileges' => [
+                    'type' => new ListType(new ShellUserPrivilegeType($this->Models)),
+                    'resolve' =>     function ($value, array $args, $info){
+                        $result = array();
+                        foreach($this->Models->ShellUserPrivilege->Where(['ShellApplicationId' => $value['Id']]) as $privilege){
+                            $result[] = $privilege->Object();
+                        }
+
+                        return $result;
+                    }
+                ]
             ]);
     }
 

@@ -27,12 +27,6 @@ class ShellApplicationField extends SchemaBaseField {
             return null;
         }else{
             $result = $model->Object();
-            $privileges = $this->Models->ShellUserPrivilege->Where(['ShellApplicationId' => $result['Id']]);
-            $result['Privileges'] = array();
-            foreach($privileges as $privilege){
-                $result['Privileges'][] = $privilege->Object();
-            }
-
             return $result;
         }
     }
