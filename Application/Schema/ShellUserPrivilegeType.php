@@ -18,6 +18,12 @@ class ShellUserPrivilegeType extends SchemaBaseType {
                 ],
                 'ShellUserId' => new IntType(),
                 'ShellApplicationId' => new IntType(),
+                'AccessToken' => [
+                    'type' => new ShellUserAccessTokenType($this->Models),
+                    'resolve' => function($value, $args, $info){
+
+                    }
+                ]
             ]);
     }
 

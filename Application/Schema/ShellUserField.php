@@ -23,11 +23,6 @@ class ShellUserField extends SchemaBaseField {
     public function resolve($value, array $args, ResolveInfo $info)
     {
 
-        $model = $this->Models->ShellUser->Where(['id' => $args['id'], 'IsDeleted' => 0])->First();
-        if($model == null){
-            return null;
-        }else{
-            return $model->Object();
-        }
+
     }
 }

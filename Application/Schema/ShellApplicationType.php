@@ -13,7 +13,7 @@ class ShellApplicationType extends SchemaBaseType {
                 'Id' => new StringType(),
                 'Name' => new StringType(),
                 'IsActive' => new IntType(),
-                'DefaultUserLever' => new IntType(),
+                'DefaultUserLevel' => new IntType(),
                 'RsaPublicKey' => new StringType(),
                 'Privileges' => [
                     'type' => new ListType(new ShellUserPrivilegeType($this->Models)),
@@ -23,6 +23,15 @@ class ShellApplicationType extends SchemaBaseType {
                             $result[] = $privilege->Object();
                         }
 
+                        return $result;
+                    }
+                ],'ActionLog' => [
+                    'type' => new ListType(new ShellUserActionLogType($this->Models)),
+                    'resolve' => function($value, $args, $info){
+                        $result = array();
+                        foreach($this->Models->ShellUserActionLog->Where(['ShellApplicationId' => $value['Id']])->OrderBy('TimeStamp') as $actionLog){
+                            $result[] = $actionLog->Object();
+                        }
                         return $result;
                     }
                 ]
