@@ -30,7 +30,7 @@ class ApplicationField extends SchemaBaseField {
     public function resolve($value, array $args, ResolveInfo $info)
     {
         $id = $args['Id'];
-        if($id == null){x
+        if($id == null){
             $application = $this->Models->ShellApplication->Create($args);
             $application->Save();
             return $application->Object();
