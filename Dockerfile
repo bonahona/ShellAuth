@@ -26,4 +26,6 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 COPY apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
 RUN rm -rf /var/www/html/Application/Temp/
+
+#CMD /usr/sbin/apache2ctl -D FOREGROUND
 CMD ./run.sh

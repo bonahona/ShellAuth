@@ -9,7 +9,8 @@ class ApplicationField extends SchemaBaseField {
 
     public function build(FieldConfig $config){
         $config->addArguments([
-            'name' => new NonNullType(new StringType()),
+            'Id' => new StringType(),
+            'Name' => new StringType(),
             'defaultUserLevel' => new IntType(),
             'rsaPublicKey' => new StringType()
         ]);
@@ -21,7 +22,7 @@ class ApplicationField extends SchemaBaseField {
 
     public function getName()
     {
-        return 'Application';
+        return 'ShellApplication';
     }
 
     public function resolve($value, array $args, ResolveInfo $info)

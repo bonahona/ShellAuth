@@ -10,4 +10,10 @@ abstract class SchemaBaseField extends AbstractField
 
     /* @var Models $Models */
     public $Models;
+
+    public function UpdateNonNullFields($model, $fields){
+        foreach($fields as $key => $value){
+            $model->$key = $value;
+        }
+    }
 }

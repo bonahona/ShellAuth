@@ -9,9 +9,12 @@ class UserField extends SchemaBaseField {
 
     public function build(FieldConfig $config){
         $config->addArguments([
-            'username' => new NonNullType(new StringType()),
-            'displayName' => new IntType(),
-            'password' => new NonNullType(new StringType()),
+            'Id' => new StringType(),
+            'Username' => new StringType(),
+            'Password' => new StringType(),
+            'DisplayName' => new StringType(),
+            'IsActive' => new IntType(),
+            'IsDeleted' => new IntType()
         ]);
     }
     public function getType()
@@ -21,17 +24,32 @@ class UserField extends SchemaBaseField {
 
     public function getName()
     {
-        return 'User';
+        return 'ShellUser';
     }
 
     public function resolve($value, array $args, ResolveInfo $info)
     {
-        $application = $this->Models->ShellApplication->Create([
-            'Name' => $args['name'],
-            'DefaultUserLevel' => $args['defaultUserLevel'],
-            'RsaPublicKey' => $args['rsaPublicKey']
-        ]);
-        $application->Save();
-        return $application->Object();
+        $id = $args['Id'];
+        if($id == null){
+            if(!isset($args['Password'])){
+                return null;
+            }
+
+            $user = $this->Models->ShellUser->Create($args);
+            $user->CreatePassword($args['Password']);
+
+            $user->Save();
+            return $user->Object();
+
+        }else{
+            $user = $this->Models->ShellUser->Where(['Id' => $args['Id'], 'IsDeleted' => 0])->First();
+            $this->UpdateNonNullFields($user, $args);
+            if(isset($args['Password'])){
+                $user->CreatePassword($args['Password']);
+            }
+
+            $user->Save();
+            return $user->Object();
+        }
     }
 }
