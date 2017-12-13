@@ -3,7 +3,6 @@ class DefaultController extends Controller
 {
     public function Index()
     {
-        echo "Test";
-        //$this->HttpNotFound();
+        return $this->Json('Invalid request');
     }
 }
