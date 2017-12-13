@@ -1,10 +1,19 @@
 {
   "Routes": [
     {
-      "/{Controller}/{Action}/{...}": {
-        "Controller": "{Controller}",
-        "Action": "{Action}",
-        "Variables": "{...}"
+      "/": {
+        "Controller": "Default",
+        "Action": "Index",
+        "Variables":{
+        }
+      }
+    },
+    {
+      "/graph": {
+        "Controller": "GraphQL",
+        "Action": "Index",
+        "Variables":{
+        }
       }
     }
   ],
