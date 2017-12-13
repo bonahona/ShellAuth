@@ -11,8 +11,10 @@ class ApplicationField extends SchemaBaseField {
         $config->addArguments([
             'Id' => new StringType(),
             'Name' => new StringType(),
-            'defaultUserLevel' => new IntType(),
-            'rsaPublicKey' => new StringType()
+            'IsActive' => new IntType(),
+            'IsDeleted' => new IntType(),
+            'DefaultUserLevel' => new IntType(),
+            'RsaPublicKey' => new StringType()
         ]);
     }
     public function getType()
@@ -27,12 +29,20 @@ class ApplicationField extends SchemaBaseField {
 
     public function resolve($value, array $args, ResolveInfo $info)
     {
-        $application = $this->Models->ShellApplication->Create([
-            'Name' => $args['name'],
-            'DefaultUserLevel' => $args['defaultUserLevel'],
-            'RsaPublicKey' => $args['rsaPublicKey']
-        ]);
-        $application->Save();
-        return $application->Object();
+        $id = $args['Id'];
+        if($id == null){x
+            $application = $this->Models->ShellApplication->Create($args);
+            $application->Save();
+            return $application->Object();
+        }else{
+            $application = $this->Models->ShellApplication->Where(['Id' => $args['Id'], 'IsDeleted' =>  0])->First();
+            if($application == null){
+                return null;
+            }
+
+            $this->UpdateNonNullFields($application, $args);
+            $application->Save();
+            return $application->Object();
+        }
     }
 }

@@ -43,6 +43,10 @@ class UserField extends SchemaBaseField {
 
         }else{
             $user = $this->Models->ShellUser->Where(['Id' => $args['Id'], 'IsDeleted' => 0])->First();
+            if($user == null){
+                return null;
+            }
+
             $this->UpdateNonNullFields($user, $args);
             if(isset($args['Password'])){
                 $user->CreatePassword($args['Password']);
