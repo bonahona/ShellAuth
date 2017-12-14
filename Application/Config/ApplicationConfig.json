@@ -2,7 +2,9 @@
   "Application": {
     "DefaultController": "Default",
     "DefaultAction": "Index",
-    "DefaultLayout": "Default"
+    "DefaultLayout": "Default",
+    "NotFoundController": "Default",
+    "NotFoundAction": "NotFound"
   },
 
   "Logging": {

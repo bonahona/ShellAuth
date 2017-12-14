@@ -5,4 +5,9 @@ class DefaultController extends Controller
     {
         return $this->Json('Invalid request');
     }
+
+    public function NotFound()
+    {
+        return $this->Json('Not found');
+    }
 }
