@@ -663,6 +663,8 @@ class Core
         // Now we need to setup the rest of the application
         $this->SetupCapabilities(array(CAPABILITIES_REQUEST));
 
+        $variables = array();
+
         if($requestData != null) {
             $controllerName = $requestData['ControllerName'];
             $actionName     = $requestData['ActionName'];
