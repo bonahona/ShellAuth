@@ -4,6 +4,7 @@ use Youshido\GraphQL\Type\Object\ObjectType;
 use Youshido\GraphQL\Execution\Processor;
 use \Youshido\GraphQL\Type\Scalar\StringType;
 use \Youshido\GraphQL\Type\Scalar\IntType;
+use \Youshido\GraphQL\Type\ListType\ListType;
 
 require_once('./Application/Schema/SchemaBaseField.php');
 require_once('./Application/Schema/SchemaBaseType.php');
@@ -63,7 +64,25 @@ class GraphQLController extends Controller
                                 $result = $model->Object();
                                 return $result;
                             }
-                        }
+                        },
+                        'ShellUsers' => [
+                            'type' => new ListType(new ShellUserType($this->Models)),
+                            'resolve' => function($value, $args, $info){
+                                $result = array();
+                                foreach($this->Models->ShellUser->Where(['IsDeleted' => 0]) as $user){
+                                    $result[] = $user->Object();
+                                }
+                            }
+                        ],
+                        'ShellApplications' => [
+                            'type' => new ListType(new ShellApplicationType($this->Models)),
+                            'resolve' => function($value, $args, $info){
+                                $result = array();
+                                foreach($this->Models->ShellApplication->Where(['IsDeleted' => 0]) as $application){
+                                    $result[] = $application->Object();
+                                }
+                            }
+                        ]
                     ]
                 ]
             ]),
