@@ -896,7 +896,7 @@ class Core
         if(!isset($this->ApplicationConfig['Application']['NotFoundController'])){
             return array(
                 'error' => 1,
-                'Application config missing NotFoundController'
+                'message' => 'Application config missing NotFoundController'
             );
         }
         $notFoundControllerName = $this->ApplicationConfig['Application']['NotFoundController'];
@@ -904,7 +904,7 @@ class Core
         if(!isset($this->ApplicationConfig['Application']['NotFoundAction'])){
             return array(
                 'error' => 1,
-                'Application config missing NotFoundAction'
+                'message' => 'Application config missing NotFoundAction'
             );
         }
         $notFoundAction = $this->ApplicationConfig['Application']['NotFoundAction'];
