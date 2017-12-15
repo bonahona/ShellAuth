@@ -19,7 +19,7 @@ class ApplicationField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellApplicationType($this->Models);
+        return new ShellApplicationType($this->Controller);
     }
 
     public function getName()
@@ -31,11 +31,11 @@ class ApplicationField extends SchemaBaseField {
     {
         $id = $args['Id'];
         if($id == null){
-            $application = $this->Models->ShellApplication->Create($args);
+            $application = $this->Controller->Models->ShellApplication->Create($args);
             $application->Save();
             return $application->Object();
         }else{
-            $application = $this->Models->ShellApplication->Where(['Id' => $args['Id'], 'IsDeleted' =>  0])->First();
+            $application = $this->Controller->Models->ShellApplication->Where(['Id' => $args['Id'], 'IsDeleted' =>  0])->First();
             if($application == null){
                 return null;
             }

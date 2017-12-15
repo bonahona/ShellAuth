@@ -12,7 +12,7 @@ class ShellUserField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellUserType($this->Models);
+        return new ShellUserType($this->Controller);
     }
 
     public function getName()

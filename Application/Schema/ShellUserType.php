@@ -14,20 +14,20 @@ class ShellUserType extends SchemaBaseType {
                 'DisplayName' => new StringType(),
                 'IsActive' => new IntType(),
                 'Privileges' => [
-                    'type' => new ListType(new ShellUserPrivilegeType($this->Models)),
+                    'type' => new ListType(new ShellUserPrivilegeType($this->Controller)),
                     'resolve' => function($value, $args, $resolveInfo) {
                         $result = array();
-                        foreach($this->Models->ShellUserPrivilege->Where(['ShellUserId' => $value['Id']]) as $privilege){
+                        foreach($this->Controller->Models->ShellUserPrivilege->Where(['ShellUserId' => $value['Id']]) as $privilege){
                             $result[] = $privilege->Object();
                         }
                         return $result;
                     }
                 ],
                 'ActionLog' => [
-                    'type' => new ListType(new ShellUserActionLogType($this->Models)),
+                    'type' => new ListType(new ShellUserActionLogType($this->Controller)),
                     'resolve' => function($value, $args, $info){
                         $result = array();
-                        foreach($this->Models->ShellUserActionLog->Where(['ShellUserId' => $value['Id']])->OrderBy('TimeStamp') as $actionLog){
+                        foreach($this->Controller->Models->ShellUserActionLog->Where(['ShellUserId' => $value['Id']])->OrderBy('TimeStamp') as $actionLog){
                             $result[] = $actionLog->Object();
                         }
                         return $result;

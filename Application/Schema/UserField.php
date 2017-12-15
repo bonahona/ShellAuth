@@ -19,7 +19,7 @@ class UserField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellUserType($this->Models);
+        return new ShellUserType($this->Controller);
     }
 
     public function getName()
@@ -35,14 +35,14 @@ class UserField extends SchemaBaseField {
                 return null;
             }
 
-            $user = $this->Models->ShellUser->Create($args);
+            $user = $this->Controller->Models->ShellUser->Create($args);
             $user->CreatePassword($args['Password']);
 
             $user->Save();
             return $user->Object();
 
         }else{
-            $user = $this->Models->ShellUser->Where(['Id' => $args['Id'], 'IsDeleted' => 0])->First();
+            $user = $this->Controller->Models->ShellUser->Where(['Id' => $args['Id'], 'IsDeleted' => 0])->First();
             if($user == null){
                 return null;
             }

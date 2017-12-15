@@ -2,14 +2,14 @@
 use \Youshido\GraphQL\Field\AbstractField;
 abstract class SchemaBaseField extends AbstractField
 {
-    public function __construct($models, array $config = [])
+    public function __construct($controller, array $config = [])
     {
         parent::__construct($config);
-        $this->Models = $models;
+        $this->Controller = $controller;
     }
 
-    /* @var Models $Models */
-    public $Models;
+    /* @var Controller $Controller */
+    public $Controller;
 
     public function UpdateNonNullFields($model, $fields){
         foreach($fields as $key => $value){

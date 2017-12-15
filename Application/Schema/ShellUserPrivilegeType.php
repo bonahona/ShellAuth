@@ -11,15 +11,15 @@ class ShellUserPrivilegeType extends SchemaBaseType {
             ->addFields([
                 'UserLevel' => new IntType(),
                 'ShellUser' => [
-                    'type' => new ShellUserType($this->Models),
+                    'type' => new ShellUserType($this->Controller),
                     'resolve' => function($value, $args, $resolveInfo) {
-                        return $this->Models->ShellUser->Where(['Id' => $value['ShellUserId'], 'IsDeleted' => 0])->First()->Object();
+                        return $this->Controller->Models->ShellUser->Where(['Id' => $value['ShellUserId'], 'IsDeleted' => 0])->First()->Object();
                     }
                 ],
                 'ShellUserId' => new IntType(),
                 'ShellApplicationId' => new IntType(),
                 'AccessToken' => [
-                    'type' => new ShellUserAccessTokenType($this->Models),
+                    'type' => new ShellUserAccessTokenType($this->Controller),
                     'resolve' => function($value, $args, $info){
 
                     }

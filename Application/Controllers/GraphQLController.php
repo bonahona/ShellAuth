@@ -16,8 +16,10 @@ require_once('./Application/Schema/ShellUserActionLogType.php');
 require_once('./Application/Schema/LoginField.php');
 require_once('./Application/Schema/UserField.php');
 require_once('./Application/Schema/ApplicationField.php');
+
 class GraphQLController extends Controller
 {
+    public $AuthToken;
     public $ApplicationSchema;
 
     protected function GetQueryString()
@@ -31,6 +33,25 @@ class GraphQLController extends Controller
             return $payload['query'];
         }
     }
+
+    protected function ParseAuthContext()
+    {
+        $headers = getallheaders();
+        if(!isset($headers['Authorization'])){
+            return null;
+        }
+
+        $authHeader = $headers['Authorization'];
+        $authTokenSplit = explode(':', $authHeader);
+        if(count($authTokenSplit) < 2){
+            return null;
+        }
+
+        $authToken = trim($authTokenSplit[1]);
+        $authUser = $this->Models->ShellUserAccessToken->Where(['Guid' => $authToken])->First();
+        return $authUser;
+    }
+
     public function Index()
     {
         $processor = new Processor(new Schema([
@@ -38,7 +59,7 @@ class GraphQLController extends Controller
                 'name' => 'RootQueryType',
                 'fields' => [
                     'ShellUser' => [
-                        'type' => new ShellUserType($this->Models),
+                        'type' => new ShellUserType($this),
                         'args' => [
                           'id' => new StringType()
                         ],
@@ -52,7 +73,7 @@ class GraphQLController extends Controller
                         }
                     ],
                     'ShellApplication' => [
-                        'type' => new ShellApplicationType($this->Models),
+                        'type' => new ShellApplicationType($this),
                         'args' => [
                             'id' => new StringType()
                         ],
@@ -67,7 +88,7 @@ class GraphQLController extends Controller
                         }
                     ],
                     'ShellApplications' => [
-                        'type' => new ListType(new ShellApplicationType($this->Models)),
+                        'type' => new ListType(new ShellApplicationType($this)),
                         'name' => 'ShellApplications',
                         'resolve' => function($value, $args, $info){
                             $result = array();
@@ -78,7 +99,7 @@ class GraphQLController extends Controller
                         }
                     ],
                     'ShellUsers' => [
-                        'type' => new ListType(new ShellUserType($this->Models)),
+                        'type' => new ListType(new ShellUserType($this)),
                         'name' => 'ShellUsers',
                         'resolve' => function($value, $args, $info){
                             $result = array();
@@ -93,13 +114,14 @@ class GraphQLController extends Controller
             'mutation' => new ObjectType([
                 'name' => 'RootMutationType',
                 'fields' => [
-                    'Login' => new LoginField($this->Models),
-                    'ShellApplication' => new ApplicationField($this->Models),
-                    'ShellUser' => new UserField($this->Models)
+                    'Login' => new LoginField($this),
+                    'ShellApplication' => new ApplicationField($this),
+                    'ShellUser' => new UserField($this)
                 ]
             ])
         ]));
 
+        $this->AuthToken = $this->ParseAuthContext();
         $queryString = $this->GetQueryString();
         return $this->Json($processor->processPayload($queryString)->getResponseData());
     }

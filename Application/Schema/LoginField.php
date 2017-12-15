@@ -15,7 +15,7 @@ class LoginField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellUserPrivilegeType($this->Models);
+        return new ShellUserPrivilegeType($this->Controller);
     }
 
     public function getName()
@@ -25,7 +25,7 @@ class LoginField extends SchemaBaseField {
 
     public function resolve($value, array $args, ResolveInfo $info)
     {
-        $user = $this->Models->ShellUser->Where(['Username' => $args['username'], 'IsDeleted' => 0])->First();
+        $user = $this->Controller->Models->ShellUser->Where(['Username' => $args['username'], 'IsDeleted' => 0])->First();
         if($user == null){
             return array();
         }
@@ -34,7 +34,7 @@ class LoginField extends SchemaBaseField {
             return null;
         }
 
-        $application = $this->Models->ShellApplication->Where(['Name' => $args['application'], 'IsDeleted' => 0])->First();
+        $application = $this->Controller->Models->ShellApplication->Where(['Name' => $args['application'], 'IsDeleted' => 0])->First();
         if($application == null){
             return null;
         }

@@ -2,12 +2,12 @@
 use \Youshido\GraphQL\Type\Object\AbstractObjectType;
 abstract class SchemaBaseType extends AbstractObjectType
 {
-    public function __construct($models, array $config = [])
+    public function __construct($controller, array $config = [])
     {
         parent::__construct($config);
-        $this->Models = $models;
+        $this->Controller = $controller;
     }
 
-    /* @var Models $Models */
-    public $Models;
+    /* @var Controller $Controller */
+    public $Controller;
 }

@@ -16,20 +16,20 @@ class ShellApplicationType extends SchemaBaseType {
                 'DefaultUserLevel' => new IntType(),
                 'RsaPublicKey' => new StringType(),
                 'Privileges' => [
-                    'type' => new ListType(new ShellUserPrivilegeType($this->Models)),
+                    'type' => new ListType(new ShellUserPrivilegeType($this->Controller)),
                     'resolve' =>     function ($value, array $args, $info){
                         $result = array();
-                        foreach($this->Models->ShellUserPrivilege->Where(['ShellApplicationId' => $value['Id']]) as $privilege){
+                        foreach($this->Controller->Models->ShellUserPrivilege->Where(['ShellApplicationId' => $value['Id']]) as $privilege){
                             $result[] = $privilege->Object();
                         }
 
                         return $result;
                     }
                 ],'ActionLog' => [
-                    'type' => new ListType(new ShellUserActionLogType($this->Models)),
+                    'type' => new ListType(new ShellUserActionLogType($this->Controller)),
                     'resolve' => function($value, $args, $info){
                         $result = array();
-                        foreach($this->Models->ShellUserActionLog->Where(['ShellApplicationId' => $value['Id']])->OrderBy('TimeStamp') as $actionLog){
+                        foreach($this->Controller->Models->ShellUserActionLog->Where(['ShellApplicationId' => $value['Id']])->OrderBy('TimeStamp') as $actionLog){
                             $result[] = $actionLog->Object();
                         }
                         return $result;
