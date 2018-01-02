@@ -15,7 +15,7 @@ class LoginField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellUserPrivilegeType($this->Controller);
+        return new ShellUserAccessTokenType($this->Controller);
     }
 
     public function getName()
@@ -27,19 +27,24 @@ class LoginField extends SchemaBaseField {
     {
         $user = $this->Controller->Models->ShellUser->Where(['Username' => $args['username'], 'IsDeleted' => 0])->First();
         if($user == null){
+            error_log('User not found');
             return array();
         }
 
         if(!$user->ValidatePassword($args['password'])){
+            error_log('Failed to validate password');
             return null;
         }
 
         $application = $this->Controller->Models->ShellApplication->Where(['Name' => $args['application'], 'IsDeleted' => 0])->First();
         if($application == null){
+            error_log('Failed to find application');
             return null;
         }
 
         $accessToken = $user->GetAccessToken($application->Id);
+        error_log(print_r($accessToken->Object(), true));
+
         return $accessToken->Object();
     }
 }

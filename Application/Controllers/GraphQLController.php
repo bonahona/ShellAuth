@@ -9,6 +9,7 @@ use \Youshido\GraphQL\Type\ListType\ListType;
 require_once('./Application/Schema/SchemaBaseField.php');
 require_once('./Application/Schema/SchemaBaseType.php');
 require_once('./Application/Schema/ShellUserType.php');
+require_once('./Application/Schema/UserPrivilegeField.php');
 require_once('./Application/Schema/ShellApplicationType.php');
 require_once('./Application/Schema/ShellUserPrivilegeType.php');
 require_once('./Application/Schema/ShellUserAccessTokenType.php');
@@ -109,6 +110,26 @@ class GraphQLController extends Controller
                             return $result;
                         }
                     ]
+                ],
+                'ValidateToken' => [
+                    'type' => new ShellUserAccessTokenType($this),
+                    'name' => 'ValidateToken',
+                    'args' => [
+                        'token' => new StringType()
+                    ],
+                    'resolve' => function($value, $args, $info){
+                        $result = $this->Controller->Models->ShellUserPrivilege->Where(['Guid' => $args['token']])->First();
+                        if($result == null){
+                            return null;
+                        }
+
+                        $date = date('Y-m-d H:i:s');
+                        if($date > $result->Expires){
+                            return null;
+                        }
+
+                        return $result->Object();
+                    }
                 ]
             ]),
             'mutation' => new ObjectType([
@@ -116,7 +137,8 @@ class GraphQLController extends Controller
                 'fields' => [
                     'Login' => new LoginField($this),
                     'ShellApplication' => new ApplicationField($this),
-                    'ShellUser' => new UserField($this)
+                    'ShellUser' => new UserField($this),
+                    'ShellUserPrivilege' => new UserPrivilegeField($this)
                 ]
             ])
         ]));

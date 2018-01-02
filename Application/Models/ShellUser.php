@@ -54,12 +54,30 @@ class ShellUser extends Model
             return null;
         }
 
-        $accessTokens = $this->Models->ShellUserAccessToken->Where(['ShellUserId' => $this->Id, 'ShellApplicationId' => $applicationId]);
+        $privilege = $this->Models->ShellUserPrivilege->Where(['ShellUserId' => $this->Id, 'ShellApplicationId' => $applicationId])->First();
+        if($privilege == null){
+            $application = $this->Models->ShellApplication->Find($applicationId);
+            if($application == null){
+                return null;
+            }
 
+            $privilege = $this->Models->ShellUserPrivilege->Create([
+                'ShellUserId' => $this->Id,
+                'ShellApplicationId' => $applicationId,
+                'UserLevel' => $application->DefaultUserLever
+            ]);
+            $privilege->Save();
+        }
+
+        $accessToken = $this->Models->ShellUserAccessToken->Where(['ShellUserPrivilegeId'=> $privilege->Id])->OrderByDescending('Expires');
         $currentDate = date('Y-m-d H:i:s');
+
+        if($accessToken->Expires > $currentDate){
+            return $accessToken;
+        }
+
         $result = $this->Models->ShellUserAccessToken->Create([
-            'ShellUserId' => $this->Id,
-            'ShellApplicationId' => $applicationId,
+            'ShellUserPrivilegeId' => $privilege->Id,
             'Issued' => $currentDate
         ]);
 

@@ -559,7 +559,7 @@ class PdoDatabase implements IDatabaseDriver
         }
 
         if(!$preparedStatement->execute($values)){
-            echo "Failed to execute PDO statement";
+            echo "Failed to execute PDO statement " . $sqlStatement . "\nValues: " . implode(',', $values);
             var_dump($this->Database->errorInfo());
         }
 

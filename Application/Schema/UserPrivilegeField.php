@@ -17,7 +17,7 @@ class UserPrivilegeField extends SchemaBaseField {
     }
     public function getType()
     {
-        return new ShellUserPrivilegeType($this->Controller);
+        return new ShellUserPrivilegeType($this);
     }
 
     public function getName()

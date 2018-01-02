@@ -1,6 +1,6 @@
 <?php
 
-const DEFAULT_VALIDITY_IN_DAYS = 365;
+const DEFAULT_VALIDITY_IN_DAYS = 30;
 
 class ShellUserAccessToken extends Model
 {
