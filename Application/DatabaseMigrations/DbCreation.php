@@ -67,26 +67,25 @@ class DbCreation implements IDatabaseMigration
             'Username' => 'Admin',
             'DisplayName' => 'Admin',
             'IsActive' => 1
-        ))->CreatePassword('H3mligt')->Save();
+        ))->CreatePassword('uNgae9jaiy')->Save();
 
-        $migrator->Models->ShellUser->Create(array(
+        $bonaUser = $migrator->Models->ShellUser->Create(array(
             'Username' => 'Bona',
             'DisplayName' => 'God Almighty',
             'IsActive' => 1
-        ))->CreatePassword('H3mligt')->Save();
+        ))->CreatePassword('uNgae9jaiy')->Save();
 
-        $migrator->Models->ShellApplication->Create(array(
-            'Name' => 'TestApplication',
+        $authApp = $migrator->Models->ShellApplication->Create(array(
+            'Name' => 'Auth',
             'IsActive' => 1,
             'DefaultUserLever' => 0,
             'RsaPublicKey' => ""
         ))->Save();
 
-        $migrator->Models->ShellApplication->Create(array(
-            'Name' => 'Auth',
-            'IsActive' => 1,
-            'DefaultUserLever' => 0,
-            'RsaPublicKey' => ""
+        $migrator->Models->ShellUserPrivilege->Create(array(
+            'ShellUserId' => $bonaUser->Id,
+            'ShellApplicationId' => $authApp->Id,
+            'UserLevel' => 1
         ))->Save();
     }
 }

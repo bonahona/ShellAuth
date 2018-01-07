@@ -146,16 +146,19 @@ class Model
         }
     }
 
+    /* @return bool */
     public function IsSaved()
     {
         return $this->IsSaved;
     }
 
+    /* @return bool */
     public function IsDirty()
     {
         return $this->IsDirty;
     }
 
+    /* @return Model */
     public function Save()
     {
         $this->ModelCollection->Save($this);
@@ -167,6 +170,8 @@ class Model
 
         $this->FlagAsSaved();
         $this->FlagAsClean();
+
+        return $this;
     }
 
     public function Delete()
