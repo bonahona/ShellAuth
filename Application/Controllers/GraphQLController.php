@@ -38,19 +38,31 @@ class GraphQLController extends Controller
     protected function ParseAuthContext()
     {
         $headers = getallheaders();
+
         if(!isset($headers['Authorization'])){
             return null;
         }
 
-        $authHeader = $headers['Authorization'];
-        $authTokenSplit = explode(':', $authHeader);
-        if(count($authTokenSplit) < 2){
-            return null;
+        $authToken = trim($headers['Authorization']);
+        $accessToken = $this->Models->ShellUserAccessToken->Where(['Guid' => $authToken])->First();
+
+        return $accessToken;
+    }
+
+    public function IsAuthorized()
+    {
+        if($this->AuthToken == null){
+            error_log('Authorization attempt with missing auth token');
+            return false;
         }
 
-        $authToken = trim($authTokenSplit[1]);
-        $authUser = $this->Models->ShellUserAccessToken->Where(['Guid' => $authToken])->First();
-        return $authUser;
+        $result = $this->AuthToken->IsValid();
+
+        if(!$result){
+            error_log('Auth token ' . $this->AuthToken->Guid . ' is invalid');
+        }
+
+        return $result;
     }
 
     public function Index()
@@ -65,6 +77,10 @@ class GraphQLController extends Controller
                           'id' => new StringType()
                         ],
                         'resolve' => function($value, $args, $info){
+                            if(!$this->IsAuthorized()){
+                                throw new Exception('Not authorized', 401);
+                            }
+
                             $model = $this->Models->ShellUser->Where(['id' => $args['id'], 'IsDeleted' => 0])->First();
                             if($model == null){
                                 return null;
@@ -79,6 +95,10 @@ class GraphQLController extends Controller
                             'id' => new StringType()
                         ],
                         'resolve' => function($value, $args, $info){
+                            if(!$this->IsAuthorized()){
+                                throw new Exception('Not authorized', 401);
+                            }
+
                             $model = $this->Models->ShellApplication->Where(['id' => $args['id'], 'IsDeleted' => 0])->First();
                             if($model == null){
                                 return null;
@@ -92,6 +112,10 @@ class GraphQLController extends Controller
                         'type' => new ListType(new ShellApplicationType($this)),
                         'name' => 'ShellApplications',
                         'resolve' => function($value, $args, $info){
+                            if(!$this->IsAuthorized()){
+                                throw new Exception('Not authorized', 401);
+                            }
+
                             $result = array();
                             foreach($this->Models->ShellApplication->Where(['IsDeleted' => 0]) as $application){
                                 $result[] = $application->Object();
@@ -103,6 +127,10 @@ class GraphQLController extends Controller
                         'type' => new ListType(new ShellUserType($this)),
                         'name' => 'ShellUsers',
                         'resolve' => function($value, $args, $info){
+                            if(!$this->IsAuthorized()){
+                                throw new Exception('Not authorized', 401);
+                            }
+
                             $result = array();
                             foreach($this->Models->ShellUser->Where(['IsDeleted' => 0]) as $application){
                                 $result[] = $application->Object();
@@ -144,6 +172,7 @@ class GraphQLController extends Controller
         ]));
 
         $this->AuthToken = $this->ParseAuthContext();
+
         $queryString = $this->GetQueryString();
         return $this->Json($processor->processPayload($queryString)->getResponseData());
     }

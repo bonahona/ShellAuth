@@ -69,16 +69,19 @@ class ShellUser extends Model
             $privilege->Save();
         }
 
-        $accessToken = $this->Models->ShellUserAccessToken->Where(['ShellUserPrivilegeId'=> $privilege->Id])->OrderByDescending('Expires');
+        $accessTokens = $this->Models->ShellUserAccessToken->Where(['ShellUserPrivilegeId'=> $privilege->Id, 'Cancelled' => 0])->OrderByDescending('Expires');
         $currentDate = date('Y-m-d H:i:s');
 
-        if($accessToken->Expires > $currentDate){
-            return $accessToken;
+        foreach($accessTokens as $accessToken) {
+            if ($accessToken->Expires > $currentDate) {
+                return $accessToken;
+            }
         }
 
         $result = $this->Models->ShellUserAccessToken->Create([
             'ShellUserPrivilegeId' => $privilege->Id,
-            'Issued' => $currentDate
+            'Issued' => $currentDate,
+            'Cancelled' => 0
         ]);
 
         $result->GenerateGuid();

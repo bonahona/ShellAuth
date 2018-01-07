@@ -29,6 +29,10 @@ class ApplicationField extends SchemaBaseField {
 
     public function resolve($value, array $args, ResolveInfo $info)
     {
+        if(!$this->Controller->IsAuthorized()){
+            throw new Exception('Not authorized', 401);
+        }
+
         $id = $args['Id'];
         if($id == null){
             $application = $this->Controller->Models->ShellApplication->Create($args);

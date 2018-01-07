@@ -9,7 +9,7 @@
       }
     },
     {
-      "/graph": {
+      "/api": {
         "Controller": "GraphQL",
         "Action": "Index",
         "Variables":{

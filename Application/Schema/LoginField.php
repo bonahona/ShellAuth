@@ -28,22 +28,21 @@ class LoginField extends SchemaBaseField {
         $user = $this->Controller->Models->ShellUser->Where(['Username' => $args['username'], 'IsDeleted' => 0])->First();
         if($user == null){
             error_log('User not found');
-            return array();
+            throw new Exception("Failed to validate user or application");
         }
 
         if(!$user->ValidatePassword($args['password'])){
             error_log('Failed to validate password');
-            return null;
+            throw new Exception("Failed to validate user or application");
         }
 
         $application = $this->Controller->Models->ShellApplication->Where(['Name' => $args['application'], 'IsDeleted' => 0])->First();
         if($application == null){
             error_log('Failed to find application');
-            return null;
+            throw new Exception("Failed to validate user or application");
         }
 
         $accessToken = $user->GetAccessToken($application->Id);
-        error_log(print_r($accessToken->Object(), true));
 
         return $accessToken->Object();
     }

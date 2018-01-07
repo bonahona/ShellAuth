@@ -27,6 +27,10 @@ class UserPrivilegeField extends SchemaBaseField {
 
     public function resolve($value, array $args, ResolveInfo $info)
     {
+        if(!$this->Controller->IsAuthorized()){
+            throw new Exception('Not authorized', 401);
+        }
+
         if(isset($args['Id'])){
             $privilege = $this->Controller->Models->ShellUserPrivilege->Find($args['Id']);
         }else if(isset($args['ShellUserId']) && isset($args['ShellApplicationId'])){

@@ -42,6 +42,7 @@ class DbCreation implements IDatabaseMigration
             ->AddColumn('Guid', 'varchar(512)')
             ->AddColumn('Issued', 'varchar(512)')
             ->AddColumn('Expires', 'varchar(512)')
+            ->AddColumn('Cancelled', 'int(1)', array('not null', 'default 0'))
             ->AddReference('ShellUserPrivilege', 'Id');
 
         $migrator->CreateTable('ShellUserActionLog')
