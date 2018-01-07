@@ -44,6 +44,13 @@ class LoginField extends SchemaBaseField {
 
         $accessToken = $user->GetAccessToken($application->Id);
 
+        $this->Controller->Models->ShellUserActionLog->Create([
+            'TimeStamp' =>  date('Y-m-d H:i:s'),
+            'ShellUserId' => $user->Id,
+            'ShellApplicationId' => $application->Id,
+            'ActionName' => 'Successfull login'
+        ])->Save();
+
         return $accessToken->Object();
     }
 }
