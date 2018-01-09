@@ -14,7 +14,7 @@ class ShellUserAccessTokenType extends SchemaBaseType {
                 'Issued' => new StringType(),
                 'Expires' => new StringType(),
                 'ShellUserPrivilege' => [
-                    'type' => new ListType(new ShellUserPrivilegeType($this->Controller)),
+                    'type' => new ShellUserPrivilegeType($this->Controller),
                     'resolve' =>     function ($value, array $args, $info){
                         $result = $this->Controller->Models->ShellUserPrivilege->Where(['Id' => $value['ShellUserPrivilegeId']])->OrderBy('Expires')->First();
                         return $result->Object();
