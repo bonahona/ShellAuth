@@ -110,6 +110,9 @@ class GraphQLController extends Controller
                     ],
                     'ShellApplications' => [
                         'type' => new ListType(new ShellApplicationType($this)),
+                        'args' => [
+                            'showInMenu' => new IntType()
+                        ],
                         'name' => 'ShellApplications',
                         'resolve' => function($value, $args, $info){
                             if(!$this->IsAuthorized()){
@@ -117,8 +120,14 @@ class GraphQLController extends Controller
                             }
 
                             $result = array();
-                            foreach($this->Models->ShellApplication->Where(['IsDeleted' => 0]) as $application){
-                                $result[] = $application->Object();
+                            if(isset($args['showInMenu'])) {
+                                foreach ($this->Models->ShellApplication->Where(['IsDeleted' => 0, 'ShowInMenu' => $args['showInMenu']]) as $application) {
+                                    $result[] = $application->Object();
+                                }
+                            }else {
+                                foreach ($this->Models->ShellApplication->Where(['IsDeleted' => 0]) as $application) {
+                                    $result[] = $application->Object();
+                                }
                             }
                             return $result;
                         }

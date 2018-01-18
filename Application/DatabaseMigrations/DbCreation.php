@@ -19,6 +19,9 @@ class DbCreation implements IDatabaseMigration
             ->AddColumn('IsActive', 'int(1)', array('not null', 'default 0'))
             ->AddColumn('IsDeleted', 'int(1)', array('not null', 'default 0'))
             ->AddColumn('DefaultUserLever', 'int', array('not null', 'default 0'))
+            ->AddColumn('ShowInMenu', 'int(1)', array('not null', 'default 0'))
+            ->AddColumn('MenuName', 'varchar(512)')
+            ->AddColumn('Url', 'varchar(512)')
             ->AddColumn('RsaPublicKey', 'varchar(512)')
             ->AddColumn('RsaPrivateKey', 'varchar(512)');
 
@@ -85,6 +88,9 @@ class DbCreation implements IDatabaseMigration
         $shareApp = $migrator->Models->ShellApplication->Create(array(
             'Name' => 'Share',
             'IsActive' => 1,
+            'ShowInMenu' => 1,
+            'MenuName' => 'Share',
+            'Url' => 'http://share.fyrvall.com',
             'DefaultUserLevel' => 0,
             'RsaPublicKey' => ""
         ))->Save();

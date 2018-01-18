@@ -13,10 +13,14 @@ class ApplicationField extends SchemaBaseField {
             'Name' => new StringType(),
             'IsActive' => new IntType(),
             'IsDeleted' => new IntType(),
+            'ShowInMenu' => new IntType(),
+            'MenuName' => new StringType(),
+            'Url' => new StringType(),
             'DefaultUserLevel' => new IntType(),
             'RsaPublicKey' => new StringType()
         ]);
     }
+
     public function getType()
     {
         return new ShellApplicationType($this->Controller);

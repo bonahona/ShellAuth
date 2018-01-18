@@ -14,6 +14,9 @@ class ShellApplicationType extends SchemaBaseType {
                 'Name' => new StringType(),
                 'IsActive' => new IntType(),
                 'DefaultUserLevel' => new IntType(),
+                'ShowInMenu' => new IntType(),
+                'MenuName' => new StringType(),
+                'Url' => new StringType(),
                 'RsaPublicKey' => new StringType(),
                 'Privileges' => [
                     'type' => new ListType(new ShellUserPrivilegeType($this->Controller)),
