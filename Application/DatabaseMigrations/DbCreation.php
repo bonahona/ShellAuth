@@ -18,7 +18,7 @@ class DbCreation implements IDatabaseMigration
             ->AddColumn('Name', 'varchar(512)')
             ->AddColumn('IsActive', 'int(1)', array('not null', 'default 0'))
             ->AddColumn('IsDeleted', 'int(1)', array('not null', 'default 0'))
-            ->AddColumn('DefaultUserLever', 'int', array('not null', 'default 0'))
+            ->AddColumn('DefaultUserLevel', 'int', array('not null', 'default 0'))
             ->AddColumn('ShowInMenu', 'int(1)', array('not null', 'default 0'))
             ->AddColumn('MenuName', 'varchar(512)')
             ->AddColumn('Url', 'varchar(512)')
