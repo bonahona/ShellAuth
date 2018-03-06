@@ -9,6 +9,7 @@ class ShellUserPrivilegeType extends SchemaBaseType {
     public function build($config){
         $config
             ->addFields([
+                'Id' => new StringType(),
                 'UserLevel' => new IntType(),
                 'ShellUser' => [
                     'type' => new ShellUserType($this->Controller),
