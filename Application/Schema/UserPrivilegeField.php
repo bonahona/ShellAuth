@@ -40,7 +40,10 @@ class UserPrivilegeField extends SchemaBaseField {
         }
 
         if($privilege == null){
-            return null;
+            $privilege = $this->Controller->Models->ShellUserPrivilege->Create(array(
+                'ShellUserId' => $args['ShellUserId'],
+                'ShellApplicationId' => $args['ShellApplicationId']
+            ));
         }
 
         if($privilege->ShellUser->IsDeleted == 1 || $privilege->ShellApplication->IsDeleted){
