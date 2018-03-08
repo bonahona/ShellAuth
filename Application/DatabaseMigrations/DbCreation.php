@@ -79,18 +79,8 @@ class DbCreation implements IDatabaseMigration
         ))->CreatePassword('H3mligt')->Save();
 
         $authApp = $migrator->Models->ShellApplication->Create(array(
-            'Name' => 'Auth',
+            'Name' => 'Manage',
             'IsActive' => 1,
-            'DefaultUserLevel' => 0,
-            'RsaPublicKey' => ""
-        ))->Save();
-
-        $shareApp = $migrator->Models->ShellApplication->Create(array(
-            'Name' => 'Share',
-            'IsActive' => 1,
-            'ShowInMenu' => 1,
-            'MenuName' => 'Share',
-            'Url' => 'http://share.fyrvall.com',
             'DefaultUserLevel' => 0,
             'RsaPublicKey' => ""
         ))->Save();
@@ -98,12 +88,6 @@ class DbCreation implements IDatabaseMigration
         $migrator->Models->ShellUserPrivilege->Create(array(
             'ShellUserId' => $bonaUser->Id,
             'ShellApplicationId' => $authApp->Id,
-            'UserLevel' => 1
-        ))->Save();
-
-        $migrator->Models->ShellUserPrivilege->Create(array(
-            'ShellUserId' => $bonaUser->Id,
-            'ShellApplicationId' => $shareApp->Id,
             'UserLevel' => 1
         ))->Save();
     }
