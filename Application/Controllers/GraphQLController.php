@@ -132,6 +132,17 @@ class GraphQLController extends Controller
                             return $result;
                         }
                     ],
+                    'PublicApplications' => [
+                        'type' => new ListType(new ShellApplicationType($this)),
+                        'name' => 'PublicApplications',
+                        'resolve' => function($value, $args, $info){
+                            $result = array();
+                            foreach ($this->Models->ShellApplication->Where(['IsDeleted' => 0, 'ShowInMenu' => $args['showInMenu']]) as $application) {
+                                $result[] = $application->Object();
+                            }
+                            return $result;
+                        }
+                    ],
                     'ShellUsers' => [
                         'type' => new ListType(new ShellUserType($this)),
                         'name' => 'ShellUsers',
