@@ -137,7 +137,7 @@ class GraphQLController extends Controller
                         'name' => 'PublicApplications',
                         'resolve' => function($value, $args, $info){
                             $result = array();
-                            foreach ($this->Models->ShellApplication->Where(['IsDeleted' => 0, 'ShowInMenu' => $args['showInMenu']]) as $application) {
+                            foreach ($this->Models->ShellApplication->Where(['IsDeleted' => 0, 'ShowInMenu' => 1]) as $application) {
                                 $result[] = $application->Object();
                             }
                             return $result;
