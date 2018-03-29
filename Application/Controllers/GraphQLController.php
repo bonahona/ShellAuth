@@ -18,8 +18,11 @@ require_once('./Application/Schema/LoginField.php');
 require_once('./Application/Schema/UserField.php');
 require_once('./Application/Schema/ApplicationField.php');
 
+define('PRE_SHARED_KEY', getenv("PRE_SHARED_KEY"));
+
 class GraphQLController extends Controller
 {
+    public $PreSharedKey;
     public $AuthToken;
     public $ApplicationSchema;
 
@@ -39,24 +42,33 @@ class GraphQLController extends Controller
     {
         $headers = getallheaders();
 
-        if(!isset($headers['Authorization'])){
-            return null;
+        if(isset($headers['Authorization'])) {
+
+            $authToken = trim($headers['Authorization']);
+            $this->AuthToken = $this->Models->ShellUserAccessToken->Where(['Guid' => $authToken])->First();
         }
 
-        $authToken = trim($headers['Authorization']);
-        $accessToken = $this->Models->ShellUserAccessToken->Where(['Guid' => $authToken])->First();
-
-        return $accessToken;
+        if(isset($headers['Psk'])){
+            $this->PreSharedKey = $headers['Psk'];
+        }
     }
 
     public function IsAuthorized()
     {
-        if($this->AuthToken == null){
+        if($this->AuthToken == null && $this->PreSharedKey == null){
             error_log('Authorization attempt with missing auth token');
             return false;
         }
 
-        $result = $this->AuthToken->IsValid();
+        if($this->PreSharedKey == PRE_SHARED_KEY){
+            return true;
+        }
+
+        if($this->AuthToken == null){
+            $result = false;
+        }else {
+            $result = $this->AuthToken->IsValid();
+        }
 
         if(!$result){
             error_log('Auth token ' . $this->AuthToken->Guid . ' is invalid');
@@ -191,7 +203,7 @@ class GraphQLController extends Controller
             ])
         ]));
 
-        $this->AuthToken = $this->ParseAuthContext();
+        $this->ParseAuthContext();
 
         $queryString = $this->GetQueryString();
         return $this->Json($processor->processPayload($queryString)->getResponseData());
