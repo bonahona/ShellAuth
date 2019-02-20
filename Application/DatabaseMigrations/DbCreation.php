@@ -85,9 +85,22 @@ class DbCreation implements IDatabaseMigration
             'RsaPublicKey' => ""
         ))->Save();
 
+        $devBlogApp = $migrator->Models->ShellApplication->Create(array(
+            'Name' => 'Dev-blog',
+            'IsActive' => 1,
+            'DefaultUserLevel' => 0,
+            'RsaPublicKey' => ""
+        ))->Save();
+
         $migrator->Models->ShellUserPrivilege->Create(array(
             'ShellUserId' => $bonaUser->Id,
             'ShellApplicationId' => $authApp->Id,
+            'UserLevel' => 1
+        ))->Save();
+
+        $migrator->Models->ShellUserPrivilege->Create(array(
+            'ShellUserId' => $bonaUser->Id,
+            'ShellApplicationId' => $devBlogApp->Id,
             'UserLevel' => 1
         ))->Save();
     }
